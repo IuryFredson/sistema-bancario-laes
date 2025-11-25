@@ -8,29 +8,43 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
 
         while (true) {
-            System.out.println("\n=== PAINEL DE CONTROLE DO BANCO ===");
-            System.out.println("--- Gestão de Clientes ---");
+            System.out.println("\n=== PAINEL DE CONTROLE DO BANCO (VERSÃO COMPLETA) ===");
+            System.out.println("--- Clientes ---");
             System.out.println("1. Cadastrar Cliente");
-            System.out.println("2. Listar Clientes (e suas Contas)");
+            System.out.println("2. Listar Clientes");
             System.out.println("3. Atualizar Cliente");
             System.out.println("4. Remover Cliente");
-            System.out.println("--- Gestão de Contas ---");
+
+            System.out.println("--- Contas ---");
             System.out.println("5. Criar Conta Corrente");
             System.out.println("6. Criar Conta Poupança");
-            System.out.println("7. Consultar Saldo da Conta");
-            System.out.println("8. Remover Conta");
-            System.out.println("--- Operações Bancárias ---");
-            System.out.println("9. Realizar Depósito");
-            System.out.println("10. Realizar Saque");
-            System.out.println("11. Realizar Transferência");
-            System.out.println("12. Aplicar Rendimento (Poupança)");
-            System.out.println("13. Atualizar Limite (Conta Corrente)");
-            System.out.println("14. Atualizar Taxa (Conta Poupança)");
-            System.out.println("--- Gestão de Funcionários (Interno) ---");
-            System.out.println("15. Cadastrar Funcionário");
-            System.out.println("16. Listar Funcionários");
-            System.out.println("17. Atualizar Funcionário");
-            System.out.println("18. Remover Funcionário");
+            System.out.println("7. Criar Conta Investimento");
+            System.out.println("8. Consultar Saldo e Detalhes");
+            System.out.println("9. Remover Conta");
+
+            System.out.println("--- Operações Básicas ---");
+            System.out.println("10. Realizar Depósito");
+            System.out.println("11. Realizar Saque");
+            System.out.println("12. Realizar Transferência");
+
+            System.out.println("--- Investimentos & Poupança ---");
+            System.out.println("13. Aplicar Rendimento (Poupança)");
+            System.out.println("14. Realizar Investimento (CDB, LCI, etc)");
+            System.out.println("15. Resgatar Investimento");
+
+            System.out.println("--- Empréstimos ---");
+            System.out.println("16. Contratar Empréstimo");
+            System.out.println("17. Pagar Parcela de Empréstimo");
+            System.out.println("18. Listar Empréstimos");
+
+            System.out.println("--- Administrativo & Auditoria ---");
+            System.out.println("19. Cadastrar Funcionário");
+            System.out.println("20. Listar Funcionários");
+            System.out.println("21. Atualizar Limites/Taxas");
+            System.out.println("22. [AUDITORIA] Ver Transações Auditadas");
+            System.out.println("23. [AUDITORIA] Ver Alertas de Fraude");
+            System.out.println("24. [RELATÓRIO] Saldo Total do Banco");
+
             System.out.println("-------------------------------------");
             System.out.println("0. Sair");
             System.out.print("Escolha uma opção: ");
@@ -47,369 +61,246 @@ public class Main {
 
             try {
                 switch (opcao) {
-
                     case 1: {
-                        System.out.println("--- Cadastro de Novo Cliente ---");
-                        System.out.print("Nome: ");
-                        String nome = scanner.nextLine().trim();
-                        if (nome.isEmpty())
-                            throw new ValidacaoException("Nome não pode ser vazio.");
-                        if (!nome.matches("^[A-Za-zÀ-ÿ\\s]+$"))
-                            throw new ValidacaoException("Nome deve conter apenas letras e espaços.");
-
-                        System.out.print("CPF (11 dígitos): ");
-                        String cpf = scanner.nextLine().trim();
-                        if (!cpf.matches("\\d{11}"))
-                            throw new ValidacaoException("CPF deve conter exatamente 11 dígitos numéricos.");
-
-                        System.out.print("Endereço: ");
-                        String endereco = scanner.nextLine().trim();
-                        if (endereco.isEmpty()) throw new ValidacaoException("Endereço não pode ser vazio.");
-
-                        System.out.print("Telefone (8 a 13 dígitos): ");
-                        String telefone = scanner.nextLine().trim();
-                        if (!telefone.matches("\\d{8,13}"))
-                            throw new ValidacaoException("Telefone deve conter entre 8 e 13 dígitos numéricos.");
-
-                        System.out.print("Tipo de cliente (comum/premium): ");
-                        String tipo = scanner.nextLine().trim().toLowerCase();
-                        if (!(tipo.equals("comum") || tipo.equals("premium")))
-                            throw new ValidacaoException("Tipo de cliente deve ser 'comum' ou 'premium'.");
-
-                        System.out.print("Renda mensal: ");
-                        double renda = scanner.nextDouble();
-                        if (renda < 0) throw new ValidacaoException("Renda não pode ser negativa.");
-                        scanner.nextLine();
-
-                        banco.cadastrarCliente(nome, cpf, endereco, telefone, tipo, renda);
-                        System.out.println(" Cliente cadastrado com sucesso!");
+                        System.out.print("Nome: "); String nome = scanner.nextLine().trim();
+                        System.out.print("CPF: "); String cpf = scanner.nextLine().trim();
+                        System.out.print("Endereço: "); String end = scanner.nextLine().trim();
+                        System.out.print("Telefone: "); String tel = scanner.nextLine().trim();
+                        System.out.print("Tipo (comum/premium): "); String tipo = scanner.nextLine().trim();
+                        System.out.print("Renda: "); double renda = scanner.nextDouble();
+                        banco.cadastrarCliente(nome, cpf, end, tel, tipo, renda);
+                        System.out.println("Cliente cadastrado!");
                         break;
                     }
-
                     case 2: {
-                        System.out.println("\n--- CLIENTES E CONTAS CADASTRADOS ---");
-                        List<Cliente> clientes = banco.listarClientes();
-                        if (clientes.isEmpty()) {
-                            System.out.println("Nenhum cliente cadastrado.");
-                            break;
-                        }
-
-                        for (Cliente cliente : clientes) {
-                            System.out.println("\n Cliente: " + cliente.getNome() +
-                                    " (CPF: " + cliente.getCpf() + ")");
-                            System.out.println("Tipo: " + cliente.getTipoCliente());
-                            System.out.printf("Renda: R$ %.2f%n", cliente.getRenda());
-
-                            List<Conta> contasDoCliente = cliente.getContas();
-                            if (contasDoCliente.isEmpty()) {
-                                System.out.println(" - Nenhuma conta cadastrada.");
-                            } else {
-                                for (Conta conta : contasDoCliente) {
-                                    String tipoConta = (conta instanceof ContaCorrente)
-                                            ? "Conta Corrente"
-                                            : "Conta Poupança";
-                                    System.out.printf(" - %s Nº %04d | Saldo: R$ %.2f%n",
-                                            tipoConta, conta.getNumero(), conta.getSaldo());
-                                }
-                            }
+                        List<Cliente> lista = banco.listarClientes();
+                        if (lista.isEmpty()) System.out.println("Nenhum cliente.");
+                        for (Cliente c : lista) {
+                            System.out.println(c.getDescricao() + " | Renda: " + c.getRenda() + " | Limite Crédito: " + c.getLimiteCredito());
                         }
                         break;
                     }
-
                     case 3: {
-                        System.out.println("--- Atualização de Cliente ---");
-                        System.out.print("CPF do cliente a ser atualizado: ");
-                        String cpf = scanner.nextLine().trim();
-
-                        Cliente cliente = banco.buscarClientePorCpf(cpf);
-                        System.out.println("Cliente encontrado: " + cliente.getNome());
-
-                        System.out.print("Novo Endereço (ou deixe em branco para manter: '" + cliente.getEndereco() + "'): ");
-                        String endereco = scanner.nextLine().trim();
-
-                        System.out.print("Novo Telefone (ou deixe em branco para manter: '" + cliente.getTelefone() + "'): ");
-                        String telefone = scanner.nextLine().trim();
-
-                        System.out.print("Novo Tipo (comum/premium) (ou deixe em branco para manter: '" + cliente.getTipoCliente() + "'): ");
-                        String tipo = scanner.nextLine().trim().toLowerCase();
-
-                        System.out.print("Nova Renda (ou deixe -1 para manter: '" + cliente.getRenda() + "'): ");
-                        double renda = scanner.nextDouble();
-                        scanner.nextLine();
-
-                        banco.atualizarDadosCliente(cpf, endereco, telefone, tipo, renda);
-                        System.out.println(" Cliente atualizado com sucesso!");
+                        System.out.print("CPF: "); String cpf = scanner.nextLine();
+                        System.out.print("Novo Endereço: "); String end = scanner.nextLine();
+                        System.out.print("Novo Telefone: "); String tel = scanner.nextLine();
+                        System.out.print("Nova Renda (-1 para manter): "); double renda = scanner.nextDouble();
+                        banco.atualizarDadosCliente(cpf, end, tel, null, renda);
+                        System.out.println("Dados atualizados.");
                         break;
                     }
-
                     case 4: {
-                        System.out.println("--- Remoção de Cliente ---");
-                        System.out.print("CPF do cliente a ser removido: ");
-                        String cpf = scanner.nextLine().trim();
-
-                        System.out.print("Tem certeza que deseja remover o cliente " + banco.buscarClientePorCpf(cpf).getNome() + "? (S/N): ");
-                        String confirmacao = scanner.nextLine().trim().toUpperCase();
-
-                        if (confirmacao.equals("S")) {
-                            banco.removerCliente(cpf);
-                            System.out.println(" Cliente removido com sucesso!");
-                        } else {
-                            System.out.println(" Operação cancelada.");
-                        }
+                        System.out.print("CPF: "); String cpf = scanner.nextLine();
+                        banco.removerCliente(cpf);
+                        System.out.println("Cliente removido.");
                         break;
                     }
-
                     case 5: {
-                        System.out.print("CPF do cliente titular: ");
-                        String cpf = scanner.nextLine().trim();
-
-                        System.out.print("Limite do cheque especial: ");
-                        double limite = scanner.nextDouble();
-                        if (limite < 0)
-                            throw new ValidacaoException("Limite não pode ser negativo.");
-                        scanner.nextLine();
-
-                        Conta conta = banco.criarContaCorrente(cpf, limite);
-                        System.out.printf(" Conta Corrente criada com sucesso! Número: %04d%n", conta.getNumero());
+                        System.out.print("CPF do Titular: "); String cpf = scanner.nextLine();
+                        System.out.print("Limite Cheque Especial: "); double lim = scanner.nextDouble();
+                        Conta c = banco.criarContaCorrente(cpf, lim);
+                        System.out.println("Conta Corrente criada: " + c.getNumero());
                         break;
                     }
-
                     case 6: {
-                        System.out.print("CPF do cliente titular: ");
-                        String cpf = scanner.nextLine().trim();
-
-                        Conta conta = banco.criarContaPoupanca(cpf);
-                        System.out.printf(" Conta Poupança criada com sucesso! Número: %04d%n", conta.getNumero());
+                        System.out.print("CPF do Titular: "); String cpf = scanner.nextLine();
+                        Conta c = banco.criarContaPoupanca(cpf);
+                        System.out.println("Conta Poupança criada: " + c.getNumero());
                         break;
                     }
-
                     case 7: {
-                        System.out.print("Número da conta (4 dígitos): ");
-                        int numero = scanner.nextInt();
-                        scanner.nextLine();
-
-                        Conta conta = banco.buscarContaPorNumero(numero);
-                        System.out.printf(" Saldo da conta %04d (%s): R$ %.2f%n",
-                                conta.getNumero(),
-                                conta.getTitular().getNome(),
-                                conta.getSaldo());
+                        System.out.print("CPF do Titular: "); String cpf = scanner.nextLine();
+                        Conta c = banco.criarContaInvestimento(cpf);
+                        System.out.println("Conta Investimento criada: " + c.getNumero());
                         break;
                     }
-
                     case 8: {
-                        System.out.print("Número da conta a ser removida (4 dígitos): ");
-                        int numero = scanner.nextInt();
-                        scanner.nextLine();
-
-                        Conta conta = banco.buscarContaPorNumero(numero);
-
-                        System.out.print("Tem certeza que deseja remover a conta " + conta.getNumero() + " do cliente " + conta.getTitular().getNome() + "? (S/N): ");
-                        String confirmacao = scanner.nextLine().trim().toUpperCase();
-
-                        if (confirmacao.equals("S")) {
-                            banco.removerConta(numero);
-                            System.out.println(" Conta removida com sucesso!");
-                        } else {
-                            System.out.println(" Operação cancelada.");
+                        System.out.print("Número da Conta: "); int num = scanner.nextInt();
+                        Conta c = banco.buscarContaPorNumero(num);
+                        System.out.printf("Conta %d | Saldo: R$ %.2f | Titular: %s%n",
+                                c.getNumero(), c.getSaldo(), c.getTitular().getNome());
+                        if (c instanceof ContaInvestimento) {
+                            System.out.println(" (Conta de Investimento)");
                         }
                         break;
                     }
-
                     case 9: {
-                        System.out.print("Número da conta (4 dígitos): ");
-                        int numero = scanner.nextInt();
-
-                        System.out.print("Valor do depósito: ");
-                        double valor = scanner.nextDouble();
-                        scanner.nextLine();
-
-                        banco.realizarDeposito(numero, valor);
-                        System.out.println(" Depósito realizado com sucesso!");
+                        System.out.print("Número da Conta: "); int num = scanner.nextInt();
+                        banco.removerConta(num);
+                        System.out.println("Conta removida.");
                         break;
                     }
-
                     case 10: {
-                        System.out.print("Número da conta (4 dígitos): ");
-                        int numero = scanner.nextInt();
-
-                        System.out.print("Valor do saque: ");
-                        double valor = scanner.nextDouble();
-                        scanner.nextLine();
-
-                        banco.realizarSaque(numero, valor);
-                        System.out.println(" Saque realizado com sucesso!");
+                        System.out.print("Conta Destino: "); int num = scanner.nextInt();
+                        System.out.print("Valor: "); double val = scanner.nextDouble();
+                        banco.realizarDeposito(num, val);
+                        System.out.println("Depósito realizado.");
                         break;
                     }
-
                     case 11: {
-                        System.out.print("Número da conta de ORIGEM (4 dígitos): ");
-                        int numOrigem = scanner.nextInt();
-
-                        System.out.print("Número da conta de DESTINO (4 dígitos): ");
-                        int numDestino = scanner.nextInt();
-
-                        System.out.print("Valor da transferência: ");
-                        double valor = scanner.nextDouble();
-                        scanner.nextLine();
-
-                        banco.realizarTransferencia(numOrigem, numDestino, valor);
-                        System.out.println(" Transferência realizada com sucesso!");
+                        System.out.print("Conta Origem: "); int num = scanner.nextInt();
+                        System.out.print("Valor: "); double val = scanner.nextDouble();
+                        banco.realizarSaque(num, val);
+                        System.out.println("Saque realizado.");
                         break;
                     }
-
                     case 12: {
-                        System.out.print("Número da conta poupança (4 dígitos): ");
-                        int numero = scanner.nextInt();
-                        scanner.nextLine();
-
-                        Conta conta = banco.buscarContaPorNumero(numero);
-
-                        if (conta instanceof ContaPoupanca poup) {
-                            poup.renderJuros();
-                            System.out.println(" Rendimento aplicado com sucesso!");
-                            System.out.printf("Taxa atual: %.2f%% | Novo saldo: R$ %.2f%n", poup.getTaxaRendimento(), poup.getSaldo());
+                        System.out.print("Conta Origem: "); int orig = scanner.nextInt();
+                        System.out.print("Conta Destino: "); int dest = scanner.nextInt();
+                        System.out.print("Valor: "); double val = scanner.nextDouble();
+                        banco.realizarTransferencia(orig, dest, val);
+                        System.out.println("Transferência realizada.");
+                        break;
+                    }
+                    case 13: {
+                        System.out.print("Conta Poupança: "); int num = scanner.nextInt();
+                        Conta c = banco.buscarContaPorNumero(num);
+                        if (c instanceof ContaPoupanca cp) {
+                            cp.renderJuros();
+                            System.out.println("Juros aplicados. Novo saldo: " + cp.getSaldo());
                         } else {
-                            throw new ValidacaoException("Essa conta não é do tipo poupança.");
+                            System.out.println("Essa conta não é poupança.");
                         }
                         break;
                     }
-
-                    case 13: {
-                        System.out.print("Número da conta corrente (4 dígitos): ");
-                        int numero = scanner.nextInt();
-
-                        System.out.print("Novo limite de cheque especial: ");
-                        double limite = scanner.nextDouble();
-                        scanner.nextLine();
-
-                        banco.atualizarLimiteContaCorrente(numero, limite);
-                        System.out.println(" Limite da Conta Corrente atualizado com sucesso!");
-                        break;
-                    }
-
                     case 14: {
-                        System.out.print("Número da conta poupança (4 dígitos): ");
-                        int numero = scanner.nextInt();
+                        System.out.print("Conta Investimento: "); int num = scanner.nextInt();
+                        Conta c = banco.buscarContaPorNumero(num);
+                        if (c instanceof ContaInvestimento ci) {
+                            System.out.println("Tipos: 1-CDB, 2-TESOURO, 3-LCI, 4-LCA, 5-FUNDO");
+                            System.out.print("Escolha: "); int t = scanner.nextInt();
+                            System.out.print("Valor: "); double val = scanner.nextDouble();
 
-                        System.out.print("Nova taxa de rendimento (em %, ex: 0.7): ");
-                        double taxa = scanner.nextDouble();
-                        scanner.nextLine();
-
-                        banco.atualizarTaxaPoupanca(numero, taxa);
-                        System.out.println(" Taxa da Conta Poupança atualizada com sucesso!");
+                            TipoInvestimento tipo = TipoInvestimento.values()[t-1];
+                            ci.investir(tipo, val);
+                            System.out.println("Investimento realizado em " + tipo);
+                        } else {
+                            System.out.println("Conta inválida para investimento.");
+                        }
                         break;
                     }
-
                     case 15: {
-                        System.out.println("--- Cadastro de Novo Funcionário ---");
-                        System.out.print("Nome: ");
-                        String nome = scanner.nextLine().trim();
-
-                        System.out.print("CPF (11 dígitos): ");
-                        String cpf = scanner.nextLine().trim();
-
-                        System.out.print("Endereço: ");
-                        String endereco = scanner.nextLine().trim();
-
-                        System.out.print("Telefone: ");
-                        String telefone = scanner.nextLine().trim();
-
-                        System.out.print("Matrícula (ex: 12345): ");
-                        int matricula = scanner.nextInt();
-                        scanner.nextLine();
-
-                        System.out.print("Cargo (ex: Gerente): ");
-                        String cargo = scanner.nextLine().trim();
-
-                        System.out.print("Salário (ex: 3500.00): ");
-                        double salario = scanner.nextDouble();
-                        scanner.nextLine();
-
-                        banco.cadastrarFuncionario(nome, cpf, endereco, telefone, matricula, cargo, salario);
-                        System.out.println(" Funcionário cadastrado com sucesso!");
+                        System.out.print("Conta Investimento: "); int num = scanner.nextInt();
+                        Conta c = banco.buscarContaPorNumero(num);
+                        if (c instanceof ContaInvestimento ci) {
+                            List<Investimento> carteira = ci.getCarteira();
+                            for (int i=0; i<carteira.size(); i++) {
+                                System.out.println(i + ": " + carteira.get(i).getResumo());
+                            }
+                            System.out.print("Índice para resgate: "); int idx = scanner.nextInt();
+                            ci.resgatar(idx);
+                            System.out.println("Resgate realizado.");
+                        } else {
+                            System.out.println("Conta inválida.");
+                        }
                         break;
                     }
-
                     case 16: {
-                        System.out.println("\n--- FUNCIONÁRIOS CADASTRADOS ---");
-                        List<Funcionario> funcionarios = banco.listarFuncionarios();
-                        if (funcionarios.isEmpty()) {
-                            System.out.println("Nenhum funcionário cadastrado.");
+                        System.out.print("CPF do Cliente: "); Scanner sc2 = new Scanner(System.in); String cpf = sc2.nextLine();
+                        Cliente cli = banco.buscarClientePorCpf(cpf);
+                        System.out.print("Valor: "); double val = scanner.nextDouble();
+                        System.out.print("Parcelas: "); int parc = scanner.nextInt();
+                        System.out.print("Taxa Juros Mensal: "); double taxa = scanner.nextDouble();
+                        banco.criarEmprestimo(cli, val, parc, taxa);
+                        System.out.println("Empréstimo contratado!");
+                        break;
+                    }
+                    case 17: {
+                        System.out.print("CPF do Cliente: "); Scanner sc2 = new Scanner(System.in); String cpf = sc2.nextLine();
+                        Cliente cli = banco.buscarClientePorCpf(cpf);
+                        List<Emprestimo> emps = cli.getEmprestimos();
+                        if(emps.isEmpty()) {
+                            System.out.println("Cliente não tem empréstimos.");
                             break;
                         }
-
-                        for (Funcionario f : funcionarios) {
-                            System.out.println("\nNome: " + f.getNome());
-                            System.out.println("Matrícula: " + f.getMatricula() + " | Cargo: " + f.getCargo());
-                            System.out.printf("Salário: R$ %.2f%n", f.getSalario());
+                        for(int i=0; i<emps.size(); i++) {
+                            System.out.printf("Empréstimo %d: Valor Total %.2f - Saldo Devedor %.2f%n",
+                                    i, emps.get(i).getValorTotal(), emps.get(i).getSaldoDevedor());
                         }
+                        System.out.print("Escolha o empréstimo (índice): "); int idx = scanner.nextInt();
+                        System.out.print("Número da Parcela a pagar: "); int numParc = scanner.nextInt();
+                        System.out.print("Conta para débito (número): "); int numConta = scanner.nextInt();
+                        Conta contaPagamento = banco.buscarContaPorNumero(numConta);
+                        banco.pagarParcelaEmprestimo(emps.get(idx), numParc, contaPagamento);
+                        System.out.println("Parcela paga com sucesso.");
                         break;
                     }
-
-                    case 17: {
-                        System.out.println("--- Atualização de Funcionário ---");
-                        System.out.print("CPF do funcionário a ser atualizado: ");
-                        String cpf = scanner.nextLine().trim();
-
-                        Funcionario f = banco.buscarFuncionarioPorCpf(cpf);
-                        System.out.println("Funcionário encontrado: " + f.getNome());
-
-                        System.out.print("Novo Endereço (ou deixe em branco para manter): ");
-                        String endereco = scanner.nextLine().trim();
-
-                        System.out.print("Novo Telefone (ou deixe em branco para manter): ");
-                        String telefone = scanner.nextLine().trim();
-
-                        System.out.print("Novo Cargo (ou deixe em branco para manter): ");
-                        String cargo = scanner.nextLine().trim();
-
-                        System.out.print("Novo Salário (ou deixe -1 para manter): ");
-                        double salario = scanner.nextDouble();
-                        scanner.nextLine();
-
-                        banco.atualizarDadosFuncionario(cpf, endereco, telefone, cargo, salario);
-                        System.out.println(" Funcionário atualizado com sucesso!");
-                        break;
-                    }
-
                     case 18: {
-                        System.out.println("--- Remoção de Funcionário ---");
-                        System.out.print("CPF do funcionário a ser removido: ");
-                        String cpf = scanner.nextLine().trim();
-
-                        System.out.println("Funcionário encontrado: " + banco.buscarFuncionarioPorCpf(cpf).getNome());
-                        System.out.print("Tem certeza que deseja remover o funcionário? (S/N): ");
-                        String confirmacao = scanner.nextLine().trim().toUpperCase();
-
-                        if (confirmacao.equals("S")) {
-                            banco.removerFuncionario(cpf);
-                            System.out.println(" Funcionário removido com sucesso!");
-                        } else {
-                            System.out.println(" Operação cancelada.");
+                        List<Emprestimo> lista = banco.listarEmprestimos();
+                        for (Emprestimo e : lista) {
+                            System.out.printf("Cliente: %s | Valor: %.2f | Restante: %.2f%n",
+                                    e.getCliente().getNome(), e.getValorTotal(), e.getSaldoDevedor());
                         }
                         break;
                     }
-
-                    case 0: {
-                        System.out.println(" Encerrando o sistema...");
-                        scanner.close();
-                        return;
+                    case 19: {
+                        System.out.print("Nome: "); Scanner sc2 = new Scanner(System.in); String nome = sc2.nextLine();
+                        System.out.print("CPF: "); String cpf = sc2.nextLine();
+                        System.out.print("Endereço: "); String end = sc2.nextLine();
+                        System.out.print("Telefone: "); String tel = sc2.nextLine();
+                        System.out.print("Matrícula: "); int mat = scanner.nextInt();
+                        System.out.print("Cargo: "); Scanner sc3 = new Scanner(System.in); String cargo = sc3.nextLine();
+                        System.out.print("Salário: "); double sal = scanner.nextDouble();
+                        banco.cadastrarFuncionario(nome, cpf, end, tel, mat, cargo, sal);
+                        System.out.println("Funcionário cadastrado.");
+                        break;
                     }
-
+                    case 20: {
+                        for(Funcionario f : banco.listarFuncionarios()) {
+                            System.out.println(f.getDescricao());
+                        }
+                        break;
+                    }
+                    case 21: {
+                        System.out.print("Número da Conta: "); int num = scanner.nextInt();
+                        Conta c = banco.buscarContaPorNumero(num);
+                        if (c instanceof ContaCorrente cc) {
+                            System.out.print("Novo Limite: "); double lim = scanner.nextDouble();
+                            banco.atualizarLimiteContaCorrente(num, lim);
+                        } else if (c instanceof ContaPoupanca cp) {
+                            System.out.print("Nova Taxa: "); double taxa = scanner.nextDouble();
+                            banco.atualizarTaxaPoupanca(num, taxa);
+                        } else {
+                            System.out.println("Conta não permite alteração de taxas/limites.");
+                        }
+                        System.out.println("Atualizado.");
+                        break;
+                    }
+                    case 22: {
+                        System.out.println("--- LOG DE AUDITORIA ---");
+                        List<Transacao> logs = banco.getAuditoria().getTransacoesAuditadas();
+                        for (Transacao t : logs) {
+                            System.out.println(t);
+                        }
+                        break;
+                    }
+                    case 23: {
+                        System.out.println("--- ALERTAS DE SEGURANÇA ---");
+                        List<String> alertas = banco.getAuditoria().getAlertas();
+                        if (alertas.isEmpty()) System.out.println("Sistema seguro. Nenhum alerta.");
+                        for (String s : alertas) {
+                            System.err.println(s);
+                        }
+                        break;
+                    }
+                    case 24: {
+                        System.out.printf("Saldo Total do Banco: R$ %.2f%n",
+                                banco.calcularSaldoTotalBanco());
+                        break;
+                    }
+                    case 0:
+                        System.out.println("Saindo...");
+                        return;
                     default:
-                        System.err.println("Opção inválida. Tente novamente!");
+                        System.out.println("Opção inválida.");
                 }
 
-            } catch (SaldoInsuficienteException e) {
-                System.err.println(" Erro de Operação: " + e.getMessage());
-            } catch (ValidacaoException e) {
-                System.err.println(" Erro de Validação: " + e.getMessage());
-            } catch (InputMismatchException e) {
-                System.err.println(" Erro de Entrada: valor inválido digitado. Use o formato correto.");
-                scanner.nextLine();
+            } catch (ValidacaoException | SaldoInsuficienteException e) {
+                System.err.println("ERRO DE NEGÓCIO: " + e.getMessage());
             } catch (Exception e) {
-                System.err.println(" Erro Inesperado: " + e.getMessage());
+                System.err.println("ERRO DE SISTEMA: " + e.getMessage());
                 e.printStackTrace();
+                scanner.nextLine();
             }
         }
     }

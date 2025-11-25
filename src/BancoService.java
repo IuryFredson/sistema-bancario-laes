@@ -1,17 +1,25 @@
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
-import java.util.HashSet;
+import java.util.*;
 
 public class BancoService {
 
-    private List<Cliente> clientes = new ArrayList<>();
-    private List<Conta> contas = new ArrayList<>();
-    private List<Funcionario> funcionarios = new ArrayList<>();
+    private List<Cliente> clientes;
+    private List<Conta> contas;
+    private List<Funcionario> funcionarios;
+    private List<Emprestimo> emprestimos;
 
-    private HashSet<Integer> numerosUsados = new HashSet<>();
-    private Random random = new Random();
+    private SistemaAuditoria auditoria;
+    private HashSet<Integer> numerosUsados;
+    private Random random;
+
+    public BancoService() {
+        this.clientes = new ArrayList<>();
+        this.contas = new ArrayList<>();
+        this.funcionarios = new ArrayList<>();
+        this.emprestimos = new ArrayList<>();
+        this.auditoria = new SistemaAuditoria();
+        this.numerosUsados = new HashSet<>();
+        this.random = new Random();
+    }
 
     private int gerarNumeroContaUnico() {
         int numero;
@@ -23,8 +31,10 @@ public class BancoService {
     }
 
     // ========================= CLIENTES =========================
-    public Cliente cadastrarCliente(String nome, String cpf, String endereco, String telefone,
-                                    String tipoCliente, double renda) throws ValidacaoException {
+
+    public Cliente cadastrarCliente(String nome, String cpf, String endereco,
+                                    String telefone, String tipoCliente, double renda)
+            throws ValidacaoException {
 
         if (buscarClienteExistente(cpf).isPresent()) {
             throw new ValidacaoException("CPF já cadastrado.");
@@ -51,31 +61,54 @@ public class BancoService {
                 .anyMatch(c -> c.getTitular().getCpf().equals(cpf));
 
         if (temConta) {
-            throw new ValidacaoException("Cliente não pode ser removido. Contas ativas encontradas. Remova as contas primeiro.");
+            throw new ValidacaoException(
+                    "Cliente não pode ser removido. Contas ativas encontradas. Remova as contas primeiro."
+            );
         }
 
         clientes.remove(cliente);
     }
 
-    public void atualizarDadosCliente(String cpf, String novoEndereco, String novoTelefone,
-                                      String novoTipoCliente, double novaRenda) throws ValidacaoException {
+    private int contasPorCpf(String cpf) {
+        int count = 0;
+        for (int i = 0; i < contas.size(); i++) {
+            if (contas.get(i).getTitular().getCpf().equals(cpf)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    public void atualizarDadosCliente(String cpf, String novoEndereco,
+                                      String novoTelefone, String novoTipoCliente,
+                                      double novaRenda) throws ValidacaoException {
 
         Cliente cliente = buscarClientePorCpf(cpf);
-        if(novoEndereco != null && !novoEndereco.isEmpty()) cliente.setEndereco(novoEndereco);
-        if(novoTelefone != null && !novoTelefone.isEmpty()) cliente.setTelefone(novoTelefone);
-        if(novoTipoCliente != null && !novoTipoCliente.isEmpty()) cliente.setTipoCliente(novoTipoCliente);
-        if(novaRenda >= 0) cliente.setRenda(novaRenda);
+
+        if (novoEndereco != null && !novoEndereco.isEmpty())
+            cliente.setEndereco(novoEndereco);
+
+        if (novoTelefone != null && novoTelefone.length() >= 8 && novoTelefone.length() <= 13)
+            cliente.setTelefone(novoTelefone);
+
+        if (novoTipoCliente != null && !novoTipoCliente.isEmpty())
+            cliente.setTipoCliente(novoTipoCliente);
+
+        if (novaRenda >= 0)
+            cliente.setRenda(novaRenda);
     }
 
     public List<Cliente> listarClientes() {
-        return clientes;
+        return new ArrayList<>(clientes);
     }
 
     // ========================= FUNCIONÁRIOS =========================
+
     public Funcionario cadastrarFuncionario(String nome, String cpf, String endereco, String telefone,
                                             int matricula, String cargo, double salario) throws ValidacaoException {
 
-        if (buscarFuncionarioExistente(cpf).isPresent() || buscarFuncionarioExistente(matricula).isPresent()) {
+        if (buscarFuncionarioExistente(cpf).isPresent() ||
+                buscarFuncionarioExistente(matricula).isPresent()) {
             throw new ValidacaoException("CPF ou Matrícula já cadastrado.");
         }
 
@@ -97,10 +130,10 @@ public class BancoService {
     private Optional<Funcionario> buscarFuncionarioExistente(String cpf) {
         return funcionarios.stream().filter(f -> f.getCpf().equals(cpf)).findFirst();
     }
+
     private Optional<Funcionario> buscarFuncionarioExistente(int matricula) {
         return funcionarios.stream().filter(f -> f.getMatricula() == matricula).findFirst();
     }
-
 
     public void removerFuncionario(String cpf) throws ValidacaoException {
         Funcionario f = buscarFuncionarioPorCpf(cpf);
@@ -111,10 +144,18 @@ public class BancoService {
                                           String novoCargo, double novoSalario) throws ValidacaoException {
 
         Funcionario funcionario = buscarFuncionarioPorCpf(cpf);
-        if(novoEndereco != null && !novoEndereco.isEmpty()) funcionario.setEndereco(novoEndereco);
-        if(novoTelefone != null && !novoTelefone.isEmpty()) funcionario.setTelefone(novoTelefone);
-        if(novoCargo != null && !novoCargo.isEmpty()) funcionario.setCargo(novoCargo);
-        if(novoSalario >= 0) funcionario.setSalario(novoSalario);
+
+        if (novoEndereco != null && !novoEndereco.isEmpty())
+            funcionario.setEndereco(novoEndereco);
+
+        if (novoTelefone != null && !novoTelefone.isEmpty())
+            funcionario.setTelefone(novoTelefone);
+
+        if (novoCargo != null && !novoCargo.isEmpty())
+            funcionario.setCargo(novoCargo);
+
+        if (novoSalario >= 0)
+            funcionario.setSalario(novoSalario);
     }
 
     public List<Funcionario> listarFuncionarios() {
@@ -122,12 +163,11 @@ public class BancoService {
     }
 
     // ========================= CONTAS =========================
+
     public Conta criarContaCorrente(String cpfCliente, double limiteInicial) throws ValidacaoException {
         Cliente cliente = buscarClientePorCpf(cpfCliente);
 
-        boolean jaTemCC = contas.stream().anyMatch(c -> c instanceof ContaCorrente &&
-                c.getTitular().getCpf().equals(cpfCliente));
-        if (jaTemCC) {
+        if (jaTemContaCorrente(cpfCliente)) {
             throw new ValidacaoException("Cliente já possui uma conta corrente.");
         }
 
@@ -141,15 +181,23 @@ public class BancoService {
     public Conta criarContaPoupanca(String cpfCliente) throws ValidacaoException {
         Cliente cliente = buscarClientePorCpf(cpfCliente);
 
-        boolean jaTemCP = contas.stream().anyMatch(c -> c instanceof ContaPoupanca &&
-                c.getTitular().getCpf().equals(cpfCliente));
-        if (jaTemCP) {
+        if (jaTemContaPoupanca(cpfCliente)) {
             throw new ValidacaoException("Cliente já possui uma conta poupança.");
         }
 
         int numero = gerarNumeroContaUnico();
-        double taxaRendimentoPadrao = 0.5; // 0.5%
+        double taxaRendimentoPadrao = 0.5;
         Conta conta = new ContaPoupanca(numero, 0.0, cliente, taxaRendimentoPadrao);
+        contas.add(conta);
+        cliente.adicionarConta(conta);
+        return conta;
+    }
+
+    public Conta criarContaInvestimento(String cpfCliente) throws ValidacaoException {
+        Cliente cliente = buscarClientePorCpf(cpfCliente);
+
+        int numero = gerarNumeroContaUnico();
+        Conta conta = new ContaInvestimento(numero, 0.0, cliente);
         contas.add(conta);
         cliente.adicionarConta(conta);
         return conta;
@@ -166,7 +214,9 @@ public class BancoService {
         if (novoLimite < 0) {
             throw new ValidacaoException("O limite não pode ser negativo.");
         }
+
         Conta conta = buscarContaPorNumero(numeroConta);
+
         if (conta instanceof ContaCorrente cc) {
             cc.setLimiteChequeEspecial(novoLimite);
         } else {
@@ -178,17 +228,14 @@ public class BancoService {
         if (novaTaxa <= 0) {
             throw new ValidacaoException("A taxa de rendimento deve ser positiva.");
         }
+
         Conta conta = buscarContaPorNumero(numeroConta);
+
         if (conta instanceof ContaPoupanca cp) {
             cp.setTaxaRendimento(novaTaxa);
         } else {
             throw new ValidacaoException("Esta conta não é uma Conta Poupança.");
         }
-    }
-
-
-    public List<Conta> listarContas() {
-        return contas;
     }
 
     public void removerConta(int numeroConta) throws ValidacaoException {
@@ -199,6 +246,7 @@ public class BancoService {
         }
 
         Cliente titular = conta.getTitular();
+
         if (titular != null && titular.getContas() != null) {
             titular.getContas().remove(conta);
         }
@@ -207,20 +255,92 @@ public class BancoService {
         numerosUsados.remove(conta.getNumero());
     }
 
+    private boolean contaExiste(int numero) {
+        return contas.stream().anyMatch(c -> c.getNumero() == numero);
+    }
+
+    private boolean jaTemContaCorrente(String cpf) {
+        return contas.stream().anyMatch(c ->
+                c instanceof ContaCorrente && c.getTitular().getCpf().equals(cpf)
+        );
+    }
+
+    private boolean jaTemContaPoupanca(String cpf) {
+        return contas.stream().anyMatch(c ->
+                c instanceof ContaPoupanca && c.getTitular().getCpf().equals(cpf)
+        );
+    }
+
+    // ========================= EMPRÉSTIMOS =========================
+
+    public Emprestimo criarEmprestimo(Cliente cliente, double valor,
+                                      int numParcelas, double taxa)
+            throws ValidacaoException {
+
+        if (valor > cliente.getLimiteCredito()) {
+            throw new ValidacaoException(
+                    "Valor excede limite de crédito. Disponível: R$ " + cliente.getLimiteCredito()
+            );
+        }
+
+        Emprestimo emp = new Emprestimo(valor, numParcelas, taxa, cliente);
+        emprestimos.add(emp);
+        cliente.adicionarEmprestimo(emp);
+
+        return emp;
+    }
+
+    public void pagarParcelaEmprestimo(Emprestimo emprestimo, int numeroParcela,
+                                       Conta conta)
+            throws SaldoInsuficienteException, ValidacaoException {
+
+        emprestimo.pagarParcela(numeroParcela, conta);
+
+        Transacao t = new Transacao(
+                TipoTransacao.PAGAMENTO_EMPRESTIMO,
+                emprestimo.getValorParcela(numeroParcela),
+                "Pagamento parcela " + numeroParcela + " de empréstimo",
+                conta, null
+        );
+
+        auditoria.auditarTransacao(t);
+    }
+
     // ========================= OPERAÇÕES =========================
 
-    public void realizarDeposito(int numeroConta, double valor) throws ValidacaoException {
+    public void realizarDeposito(int numeroConta, double valor)
+            throws ValidacaoException {
+
         Conta conta = buscarContaPorNumero(numeroConta);
         conta.depositar(valor);
+
+        Transacao t = new Transacao(
+                TipoTransacao.DEPOSITO, valor,
+                "Depósito em conta " + numeroConta,
+                null, conta
+        );
+
+        auditoria.auditarTransacao(t);
     }
 
     public void realizarSaque(int numeroConta, double valor)
             throws SaldoInsuficienteException, ValidacaoException {
+
         Conta conta = buscarContaPorNumero(numeroConta);
         conta.sacar(valor);
+
+        Transacao t = new Transacao(
+                TipoTransacao.SAQUE, valor,
+                "Saque da conta " + numeroConta,
+                conta, null
+        );
+
+        auditoria.auditarTransacao(t);
     }
 
-    public void realizarTransferencia(int numeroContaOrigem, int numeroContaDestino, double valor)
+    public void realizarTransferencia(int numeroContaOrigem,
+                                      int numeroContaDestino,
+                                      double valor)
             throws SaldoInsuficienteException, ValidacaoException {
 
         if (numeroContaOrigem == numeroContaDestino) {
@@ -242,5 +362,36 @@ public class BancoService {
             contaOrigem.depositar(valor);
             throw new ValidacaoException("Erro no depósito de destino. Transferência cancelada.");
         }
+
+        Transacao t = new Transacao(
+                TipoTransacao.TRANSFERENCIA_ENVIADA,
+                valor,
+                String.format("Transferência de %d para %d", numeroContaOrigem, numeroContaDestino),
+                contaOrigem, contaDestino
+        );
+
+        auditoria.auditarTransacao(t);
+    }
+
+    // ========================= RELATÓRIOS =========================
+
+    public double calcularSaldoTotalBanco() {
+        double total = 0;
+        for (int i = 0; i < contas.size(); i++) {
+            total += contas.get(i).getSaldo();
+        }
+        return total;
+    }
+
+    public SistemaAuditoria getAuditoria() {
+        return auditoria;
+    }
+
+    public List<Emprestimo> listarEmprestimos() {
+        return new ArrayList<>(emprestimos);
+    }
+
+    public List<Conta> listarContas() {
+        return new ArrayList<>(contas);
     }
 }
