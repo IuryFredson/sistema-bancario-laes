@@ -1,20 +1,44 @@
 public class ContaPoupanca extends Conta {
 
-    private double taxaRendimento;
+    private /*@ spec_public @*/ double taxaRendimento;
 
+    //@ public invariant taxaRendimento > 0;
+
+    //@ requires numero >= 1000 && numero <= 9999;
+    //@ requires titular != null;
+    //@ requires taxa > 0;
+    //@ ensures this.taxaRendimento == taxa;
+    //@ pure
     public ContaPoupanca(int numero, double saldo, Cliente titular, double taxa) {
         super(numero, saldo, titular);
         this.taxaRendimento = taxa;
     }
 
+    //@ ensures \result == taxaRendimento;
+    //@ ensures \result > 0;
+    //@ pure
     public double getTaxaRendimento() {
         return taxaRendimento;
     }
 
+    //@ requires taxa > 0;
+    //@ assignable taxaRendimento;
+    //@ ensures taxaRendimento == taxa;
     public void setTaxaRendimento(double taxa) {
         this.taxaRendimento = taxa;
     }
 
+    //@ public normal_behavior
+    //@   requires taxaRendimento > 0;
+    //@   assignable saldo, historicoTransacoes, getTitular().historicoTransacoes;
+    //@   ensures getSaldo() > \old(getSaldo());
+    //@   ensures getSaldo() == \old(getSaldo()) * (1 + taxaRendimento / 100);
+    //@   ensures historicoTransacoes.size() == \old(historicoTransacoes.size()) + 1;
+    //@ also
+    //@ public exceptional_behavior
+    //@   requires taxaRendimento <= 0;
+    //@   assignable \nothing;
+    //@   signals_only ValidacaoException;
     public void renderJuros() throws ValidacaoException {
         if (this.taxaRendimento <= 0) {
             throw new ValidacaoException("Taxa de rendimento deve ser positiva para aplicar.");
@@ -34,6 +58,18 @@ public class ContaPoupanca extends Conta {
         registrarTransacao(t);
     }
 
+    //@ also
+    //@ public normal_behavior
+    //@   requires valor > 0;
+    //@   requires valor <= getSaldo();
+    //@   assignable saldo, historicoTransacoes, getTitular().historicoTransacoes;
+    //@   ensures getSaldo() == \old(getSaldo()) - valor;
+    //@   ensures historicoTransacoes.size() == \old(historicoTransacoes.size()) + 1;
+    //@ also
+    //@ public exceptional_behavior
+    //@   requires valor <= 0 || valor > getSaldo();
+    //@   assignable \nothing;
+    //@   signals_only SaldoInsuficienteException, ValidacaoException;
     public void sacar(double valor) throws SaldoInsuficienteException, ValidacaoException {
         if (valor <= 0) {
             throw new ValidacaoException("O valor do saque deve ser positivo.");
@@ -58,6 +94,9 @@ public class ContaPoupanca extends Conta {
         registrarTransacao(t);
     }
 
+    //@ also
+    //@ ensures \result == 0.0;
+    //@ pure
     public double calcularTarifa() {
         return 0.0;
     }
