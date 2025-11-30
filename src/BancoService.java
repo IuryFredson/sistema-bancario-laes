@@ -2,15 +2,34 @@ import java.util.*;
 
 public class BancoService {
 
-    private List<Cliente> clientes;
-    private List<Conta> contas;
-    private List<Funcionario> funcionarios;
-    private List<Emprestimo> emprestimos;
+    private /*@ spec_public @*/ List<Cliente> clientes;
+    private /*@ spec_public @*/ List<Conta> contas;
+    private /*@ spec_public @*/ List<Funcionario> funcionarios;
+    private /*@ spec_public @*/ List<Emprestimo> emprestimos;
 
-    private SistemaAuditoria auditoria;
-    private HashSet<Integer> numerosUsados;
-    private Random random;
+    private /*@ spec_public @*/ SistemaAuditoria auditoria;
+    private /*@ spec_public @*/ HashSet<Integer> numerosUsados;
+    private /*@ spec_public @*/ Random random;
 
+    //@ public invariant clientes != null;
+    //@ public invariant contas != null;
+    //@ public invariant funcionarios != null;
+    //@ public invariant emprestimos != null;
+    //@ public invariant auditoria != null;
+    //@ public invariant numerosUsados != null;
+    //@ public invariant random != null;
+    //@ public invariant (\forall int i; 0 <= i && i < clientes.size(); clientes.get(i) != null);
+    //@ public invariant (\forall int i; 0 <= i && i < contas.size(); contas.get(i) != null);
+    //@ public invariant (\forall int i; 0 <= i && i < funcionarios.size(); funcionarios.get(i) != null);
+    //@ public invariant (\forall int i; 0 <= i && i < emprestimos.size(); emprestimos.get(i) != null);
+
+    //@ ensures clientes != null && clientes.isEmpty();
+    //@ ensures contas != null && contas.isEmpty();
+    //@ ensures funcionarios != null && funcionarios.isEmpty();
+    //@ ensures emprestimos != null && emprestimos.isEmpty();
+    //@ ensures auditoria != null;
+    //@ ensures numerosUsados != null && numerosUsados.isEmpty();
+    //@ ensures random != null;
     public BancoService() {
         this.clientes = new ArrayList<>();
         this.contas = new ArrayList<>();
@@ -21,6 +40,8 @@ public class BancoService {
         this.random = new Random();
     }
 
+    //@ ensures \result >= 1000 && \result <= 9999;
+    //@ assignable numerosUsados;
     private int gerarNumeroContaUnico() {
         int numero;
         do {
@@ -32,11 +53,25 @@ public class BancoService {
 
     // ========================= CLIENTES =========================
 
+    //@ public normal_behavior
+    //@   requires nome != null && !nome.isEmpty();
+    //@   requires cpf != null && cpf.length() == 11;
+    //@   requires !existeCliente(cpf);
+    //@   assignable clientes;
+    //@   ensures clientes.size() == \old(clientes.size()) + 1;
+    //@   ensures \result != null;
+    //@   ensures \result.getCpf().equals(cpf);
+    //@   ensures clientes.contains(\result);
+    //@ also
+    //@ public exceptional_behavior
+    //@   requires existeCliente(cpf);
+    //@   assignable \nothing;
+    //@   signals_only ValidacaoException;
     public Cliente cadastrarCliente(String nome, String cpf, String endereco,
                                     String telefone, String tipoCliente, double renda)
             throws ValidacaoException {
 
-        if (buscarClienteExistente(cpf).isPresent()) {
+        if (existeCliente(cpf)) {
             throw new ValidacaoException("CPF já cadastrado.");
         }
 
@@ -45,20 +80,58 @@ public class BancoService {
         return cliente;
     }
 
-    public Cliente buscarClientePorCpf(String cpf) throws ValidacaoException {
-        return buscarClienteExistente(cpf)
-                .orElseThrow(() -> new ValidacaoException("Cliente não encontrado."));
+    //@ public normal_behavior
+    //@   requires cpf != null;
+    //@   requires existeCliente(cpf);
+    //@   ensures \result != null;
+    //@   ensures \result.getCpf().equals(cpf);
+    //@ also
+    //@ public exceptional_behavior
+    //@   requires !existeCliente(cpf);
+    //@   assignable \nothing;
+    //@   signals_only ValidacaoException;
+    public /*@ pure @*/ Cliente buscarClientePorCpf(String cpf) throws ValidacaoException {
+        for (Cliente c : clientes) {
+            if (c.getCpf().equals(cpf)) {
+                return c;
+            }
+        }
+        throw new ValidacaoException("Cliente não encontrado.");
     }
 
-    private Optional<Cliente> buscarClienteExistente(String cpf) {
-        return clientes.stream().filter(c -> c.getCpf().equals(cpf)).findFirst();
+    //@ requires cpf != null;
+    //@ ensures \result == (\exists int i; 0 <= i && i < clientes.size(); clientes.get(i).getCpf().equals(cpf));
+    private /*@ spec_public pure helper @*/ boolean existeCliente(String cpf) {
+        for (Cliente c : clientes) {
+            if (c.getCpf().equals(cpf)) {
+                return true;
+            }
+        }
+        return false;
     }
 
+    //@ public normal_behavior
+    //@   requires cpf != null;
+    //@   requires existeCliente(cpf);
+    //@   requires (\forall int i; 0 <= i && i < contas.size(); !contas.get(i).getTitular().getCpf().equals(cpf));
+    //@   assignable clientes;
+    //@   ensures clientes.size() == \old(clientes.size()) - 1;
+    //@   ensures !existeCliente(cpf);
+    //@ also
+    //@ public exceptional_behavior
+    //@   requires !existeCliente(cpf) || (\exists int i; 0 <= i && i < contas.size(); contas.get(i).getTitular().getCpf().equals(cpf));
+    //@   assignable \nothing;
+    //@   signals_only ValidacaoException;
     public void removerCliente(String cpf) throws ValidacaoException {
         Cliente cliente = buscarClientePorCpf(cpf);
 
-        boolean temConta = contas.stream()
-                .anyMatch(c -> c.getTitular().getCpf().equals(cpf));
+        boolean temConta = false;
+        for (Conta c : contas) {
+            if (c.getTitular().getCpf().equals(cpf)) {
+                temConta = true;
+                break;
+            }
+        }
 
         if (temConta) {
             throw new ValidacaoException(
@@ -69,16 +142,20 @@ public class BancoService {
         clientes.remove(cliente);
     }
 
-    private int contasPorCpf(String cpf) {
+    //@ requires cpf != null;
+    //@ ensures \result >= 0;
+    private /*@ spec_public pure @*/ int contasPorCpf(String cpf) {
         int count = 0;
-        for (int i = 0; i < contas.size(); i++) {
-            if (contas.get(i).getTitular().getCpf().equals(cpf)) {
+        for (Conta conta : contas) {
+            if (conta.getTitular().getCpf().equals(cpf)) {
                 count++;
             }
         }
         return count;
     }
 
+    //@ requires cpf != null;
+    //@ ensures existeCliente(cpf);
     public void atualizarDadosCliente(String cpf, String novoEndereco,
                                       String novoTelefone, String novoTipoCliente,
                                       double novaRenda) throws ValidacaoException {
@@ -98,17 +175,29 @@ public class BancoService {
             cliente.setRenda(novaRenda);
     }
 
+    //@ ensures \result != null;
+    //@ ensures \result.size() == clientes.size();
+    //@ pure
     public List<Cliente> listarClientes() {
         return new ArrayList<>(clientes);
     }
 
     // ========================= FUNCIONÁRIOS =========================
 
+    //@ public normal_behavior
+    //@   requires cpf != null && nome != null;
+    //@   requires !existeFuncionario(cpf, matricula);
+    //@   assignable funcionarios;
+    //@   ensures funcionarios.size() == \old(funcionarios.size()) + 1;
+    //@   ensures \result != null;
+    //@ also
+    //@ public exceptional_behavior
+    //@   requires existeFuncionario(cpf, matricula);
+    //@   signals_only ValidacaoException;
     public Funcionario cadastrarFuncionario(String nome, String cpf, String endereco, String telefone,
                                             int matricula, String cargo, double salario) throws ValidacaoException {
 
-        if (buscarFuncionarioExistente(cpf).isPresent() ||
-                buscarFuncionarioExistente(matricula).isPresent()) {
+        if (existeFuncionario(cpf, matricula)) {
             throw new ValidacaoException("CPF ou Matrícula já cadastrado.");
         }
 
@@ -117,22 +206,35 @@ public class BancoService {
         return funcionario;
     }
 
-    public Funcionario buscarFuncionarioPorCpf(String cpf) throws ValidacaoException {
-        return buscarFuncionarioExistente(cpf)
-                .orElseThrow(() -> new ValidacaoException("Funcionário não encontrado."));
+    //@ requires cpf != null;
+    //@ ensures \result == (\exists int i; 0 <= i && i < funcionarios.size(); funcionarios.get(i).getCpf().equals(cpf) || funcionarios.get(i).getMatricula() == matricula);
+    private /*@ spec_public pure helper @*/ boolean existeFuncionario(String cpf, int matricula) {
+        for (Funcionario f : funcionarios) {
+            if (f.getCpf().equals(cpf) || f.getMatricula() == matricula) {
+                return true;
+            }
+        }
+        return false;
     }
 
-    public Funcionario buscarFuncionarioPorMatricula(int matricula) throws ValidacaoException {
-        return buscarFuncionarioExistente(matricula)
-                .orElseThrow(() -> new ValidacaoException("Funcionário não encontrado."));
+    //@ ensures \result != null;
+    public /*@ pure @*/ Funcionario buscarFuncionarioPorCpf(String cpf) throws ValidacaoException {
+        for (Funcionario f : funcionarios) {
+            if (f.getCpf().equals(cpf)) {
+                return f;
+            }
+        }
+        throw new ValidacaoException("Funcionário não encontrado.");
     }
 
-    private Optional<Funcionario> buscarFuncionarioExistente(String cpf) {
-        return funcionarios.stream().filter(f -> f.getCpf().equals(cpf)).findFirst();
-    }
-
-    private Optional<Funcionario> buscarFuncionarioExistente(int matricula) {
-        return funcionarios.stream().filter(f -> f.getMatricula() == matricula).findFirst();
+    //@ ensures \result != null;
+    public /*@ pure @*/ Funcionario buscarFuncionarioPorMatricula(int matricula) throws ValidacaoException {
+        for (Funcionario f : funcionarios) {
+            if (f.getMatricula() == matricula) {
+                return f;
+            }
+        }
+        throw new ValidacaoException("Funcionário não encontrado.");
     }
 
     public void removerFuncionario(String cpf) throws ValidacaoException {
@@ -164,6 +266,19 @@ public class BancoService {
 
     // ========================= CONTAS =========================
 
+    //@ public normal_behavior
+    //@   requires cpfCliente != null;
+    //@   requires existeCliente(cpfCliente);
+    //@   requires !jaTemContaCorrente(cpfCliente);
+    //@   requires limiteInicial >= 0;
+    //@   assignable contas, numerosUsados;
+    //@   ensures contas.size() == \old(contas.size()) + 1;
+    //@   ensures \result != null;
+    //@   ensures \result instanceof ContaCorrente;
+    //@ also
+    //@ public exceptional_behavior
+    //@   requires !existeCliente(cpfCliente) || jaTemContaCorrente(cpfCliente);
+    //@   signals_only ValidacaoException;
     public Conta criarContaCorrente(String cpfCliente, double limiteInicial) throws ValidacaoException {
         Cliente cliente = buscarClientePorCpf(cpfCliente);
 
@@ -178,6 +293,18 @@ public class BancoService {
         return conta;
     }
 
+    //@ public normal_behavior
+    //@   requires cpfCliente != null;
+    //@   requires existeCliente(cpfCliente);
+    //@   requires !jaTemContaPoupanca(cpfCliente);
+    //@   assignable contas, numerosUsados;
+    //@   ensures contas.size() == \old(contas.size()) + 1;
+    //@   ensures \result != null;
+    //@   ensures \result instanceof ContaPoupanca;
+    //@ also
+    //@ public exceptional_behavior
+    //@   requires !existeCliente(cpfCliente) || jaTemContaPoupanca(cpfCliente);
+    //@   signals_only ValidacaoException;
     public Conta criarContaPoupanca(String cpfCliente) throws ValidacaoException {
         Cliente cliente = buscarClientePorCpf(cpfCliente);
 
@@ -193,6 +320,13 @@ public class BancoService {
         return conta;
     }
 
+    //@ public normal_behavior
+    //@   requires cpfCliente != null;
+    //@   requires existeCliente(cpfCliente);
+    //@   assignable contas, numerosUsados;
+    //@   ensures contas.size() == \old(contas.size()) + 1;
+    //@   ensures \result != null;
+    //@   ensures \result instanceof ContaInvestimento;
     public Conta criarContaInvestimento(String cpfCliente) throws ValidacaoException {
         Cliente cliente = buscarClientePorCpf(cpfCliente);
 
@@ -203,11 +337,21 @@ public class BancoService {
         return conta;
     }
 
-    public Conta buscarContaPorNumero(int numero) throws ValidacaoException {
-        return contas.stream()
-                .filter(c -> c.getNumero() == numero)
-                .findFirst()
-                .orElseThrow(() -> new ValidacaoException("Conta não encontrada."));
+    //@ public normal_behavior
+    //@   requires contaExiste(numero);
+    //@   ensures \result != null;
+    //@   ensures \result.getNumero() == numero;
+    //@ also
+    //@ public exceptional_behavior
+    //@   requires !contaExiste(numero);
+    //@   signals_only ValidacaoException;
+    public /*@ pure @*/ Conta buscarContaPorNumero(int numero) throws ValidacaoException {
+        for (Conta c : contas) {
+            if (c.getNumero() == numero) {
+                return c;
+            }
+        }
+        throw new ValidacaoException("Conta não encontrada.");
     }
 
     public void atualizarLimiteContaCorrente(int numeroConta, double novoLimite) throws ValidacaoException {
@@ -217,8 +361,8 @@ public class BancoService {
 
         Conta conta = buscarContaPorNumero(numeroConta);
 
-        if (conta instanceof ContaCorrente cc) {
-            cc.setLimiteChequeEspecial(novoLimite);
+        if (conta instanceof ContaCorrente) {
+            ((ContaCorrente) conta).setLimiteChequeEspecial(novoLimite);
         } else {
             throw new ValidacaoException("Esta conta não é uma Conta Corrente.");
         }
@@ -231,13 +375,24 @@ public class BancoService {
 
         Conta conta = buscarContaPorNumero(numeroConta);
 
-        if (conta instanceof ContaPoupanca cp) {
-            cp.setTaxaRendimento(novaTaxa);
+        if (conta instanceof ContaPoupanca) {
+            ((ContaPoupanca) conta).setTaxaRendimento(novaTaxa);
         } else {
             throw new ValidacaoException("Esta conta não é uma Conta Poupança.");
         }
     }
 
+    //@ public normal_behavior
+    //@   requires contaExiste(numeroConta);
+    //@   // Requer que a conta tenha saldo zero para ser fechada
+    //@   requires buscarContaPorNumero(numeroConta).getSaldo() == 0;
+    //@   assignable contas, numerosUsados;
+    //@   ensures !contaExiste(numeroConta);
+    //@   ensures contas.size() == \old(contas.size()) - 1;
+    //@ also
+    //@ public exceptional_behavior
+    //@   requires !contaExiste(numeroConta) || buscarContaPorNumero(numeroConta).getSaldo() != 0;
+    //@   signals_only ValidacaoException;
     public void removerConta(int numeroConta) throws ValidacaoException {
         Conta conta = buscarContaPorNumero(numeroConta);
 
@@ -255,24 +410,49 @@ public class BancoService {
         numerosUsados.remove(conta.getNumero());
     }
 
-    private boolean contaExiste(int numero) {
-        return contas.stream().anyMatch(c -> c.getNumero() == numero);
+    //@ ensures \result == (\exists int i; 0 <= i && i < contas.size(); contas.get(i).getNumero() == numero);
+    private /*@ spec_public pure helper @*/ boolean contaExiste(int numero) {
+        for (Conta c : contas) {
+            if (c.getNumero() == numero) {
+                return true;
+            }
+        }
+        return false;
     }
 
-    private boolean jaTemContaCorrente(String cpf) {
-        return contas.stream().anyMatch(c ->
-                c instanceof ContaCorrente && c.getTitular().getCpf().equals(cpf)
-        );
+    //@ requires cpf != null;
+    private /*@ spec_public pure helper @*/ boolean jaTemContaCorrente(String cpf) {
+        for (Conta c : contas) {
+            if (c instanceof ContaCorrente && c.getTitular().getCpf().equals(cpf)) {
+                return true;
+            }
+        }
+        return false;
     }
 
-    private boolean jaTemContaPoupanca(String cpf) {
-        return contas.stream().anyMatch(c ->
-                c instanceof ContaPoupanca && c.getTitular().getCpf().equals(cpf)
-        );
+    //@ requires cpf != null;
+    private /*@ spec_public pure helper @*/ boolean jaTemContaPoupanca(String cpf) {
+        for (Conta c : contas) {
+            if (c instanceof ContaPoupanca && c.getTitular().getCpf().equals(cpf)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // ========================= EMPRÉSTIMOS =========================
 
+    //@ public normal_behavior
+    //@   requires cliente != null;
+    //@   requires valor > 0 && numParcelas > 0 && taxa >= 0;
+    //@   requires valor <= cliente.getLimiteCredito();
+    //@   assignable emprestimos;
+    //@   ensures emprestimos.size() == \old(emprestimos.size()) + 1;
+    //@   ensures \result != null;
+    //@ also
+    //@ public exceptional_behavior
+    //@   requires valor > cliente.getLimiteCredito();
+    //@   signals_only ValidacaoException;
     public Emprestimo criarEmprestimo(Cliente cliente, double valor,
                                       int numParcelas, double taxa)
             throws ValidacaoException {
@@ -290,6 +470,7 @@ public class BancoService {
         return emp;
     }
 
+    //@ requires emprestimo != null && conta != null;
     public void pagarParcelaEmprestimo(Emprestimo emprestimo, int numeroParcela,
                                        Conta conta)
             throws SaldoInsuficienteException, ValidacaoException {
@@ -308,6 +489,9 @@ public class BancoService {
 
     // ========================= OPERAÇÕES =========================
 
+    //@ requires contaExiste(numeroConta);
+    //@ requires valor > 0;
+    //@ assignable auditoria.transacoesAuditadas;
     public void realizarDeposito(int numeroConta, double valor)
             throws ValidacaoException {
 
@@ -323,6 +507,9 @@ public class BancoService {
         auditoria.auditarTransacao(t);
     }
 
+    //@ requires contaExiste(numeroConta);
+    //@ requires valor > 0;
+    //@ assignable auditoria.transacoesAuditadas;
     public void realizarSaque(int numeroConta, double valor)
             throws SaldoInsuficienteException, ValidacaoException {
 
@@ -338,6 +525,19 @@ public class BancoService {
         auditoria.auditarTransacao(t);
     }
 
+    //@ public normal_behavior
+    //@   requires contaExiste(numeroContaOrigem) && contaExiste(numeroContaDestino);
+    //@   requires numeroContaOrigem != numeroContaDestino;
+    //@   requires valor > 0;
+    //@   requires buscarContaPorNumero(numeroContaOrigem).getSaldo() >= valor; // Simplificação para Conta Comum
+    //@   assignable auditoria.transacoesAuditadas;
+    //@   // Garante a consistência do saldo total do sistema (dinheiro sai de um e entra no outro)
+    //@   ensures buscarContaPorNumero(numeroContaOrigem).getSaldo() == \old(buscarContaPorNumero(numeroContaOrigem).getSaldo()) - valor;
+    //@   ensures buscarContaPorNumero(numeroContaDestino).getSaldo() == \old(buscarContaPorNumero(numeroContaDestino).getSaldo()) + valor;
+    //@ also
+    //@ public exceptional_behavior
+    //@   requires numeroContaOrigem == numeroContaDestino || valor <= 0;
+    //@   signals_only ValidacaoException, SaldoInsuficienteException;
     public void realizarTransferencia(int numeroContaOrigem,
                                       int numeroContaDestino,
                                       double valor)
@@ -375,22 +575,33 @@ public class BancoService {
 
     // ========================= RELATÓRIOS =========================
 
+    //@ ensures \result >= 0;
+    //@ pure
     public double calcularSaldoTotalBanco() {
         double total = 0;
+        //@ maintaining 0 <= i && i <= contas.size();
+        //@ loop_writes i, total;
+        //@ decreases contas.size() - i;
         for (int i = 0; i < contas.size(); i++) {
             total += contas.get(i).getSaldo();
         }
         return total;
     }
 
+    //@ ensures \result != null;
+    //@ pure
     public SistemaAuditoria getAuditoria() {
         return auditoria;
     }
 
+    //@ ensures \result != null;
+    //@ pure
     public List<Emprestimo> listarEmprestimos() {
         return new ArrayList<>(emprestimos);
     }
 
+    //@ ensures \result != null;
+    //@ pure
     public List<Conta> listarContas() {
         return new ArrayList<>(contas);
     }
