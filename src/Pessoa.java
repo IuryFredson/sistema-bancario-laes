@@ -28,7 +28,7 @@ public abstract class Pessoa {
 
     //@ ensures \result != null && !\result.isEmpty();
     //@ ensures \result.equals(nome);
-    public /*@ pure @*/ String getNome() {
+    public /*@ spec_pure @*/ String getNome() {
         return nome;
     }
 
@@ -41,7 +41,7 @@ public abstract class Pessoa {
 
     //@ ensures \result != null && \result.length() == 11;
     //@ ensures \result.equals(cpf);
-    //@ pure
+    //@ spec_pure
     public String getCpf() {
         return cpf;
     }

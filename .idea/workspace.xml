@@ -9,20 +9,8 @@
       <change beforePath="$PROJECT_DIR$/src/BancoService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/BancoService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Cliente.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Cliente.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Conta.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Conta.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ContaCorrente.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ContaCorrente.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ContaInvestimento.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ContaInvestimento.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ContaPoupanca.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ContaPoupanca.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Emprestimo.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Emprestimo.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Funcionario.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Funcionario.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Investimento.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Investimento.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Parcela.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Parcela.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Pessoa.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Pessoa.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/SaldoInsuficienteException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SaldoInsuficienteException.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/SistemaAuditoria.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SistemaAuditoria.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/TipoInvestimento.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/TipoInvestimento.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/TipoTransacao.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/TipoTransacao.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Transacao.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Transacao.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ValidacaoException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ValidacaoException.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -41,30 +29,35 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 4
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 4
+}</component>
   <component name="ProjectId" id="35w0oftlmVrK0OpYwUOLnBH1Qfg" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;feature/refactor-logic&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/iury/Área de trabalho/Projetos/sistema-bancario-laes&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "feature/jml-annotations",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/home/iury/Área de trabalho/PJML/sistema-bancario-laes/specs/java/lang",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/specs/java/lang" />
+    </key>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -92,6 +85,7 @@
       <workItem from="1764266540455" duration="2226000" />
       <workItem from="1764271872544" duration="1491000" />
       <workItem from="1764335269567" duration="6899000" />
+      <workItem from="1764612027544" duration="7806000" />
     </task>
     <servers />
   </component>

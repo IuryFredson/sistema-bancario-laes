@@ -1,12 +1,13 @@
 import java.util.ArrayList;
 import java.util.List;
 
+//@ nullable_by_default
 public abstract class Conta {
 
     private /*@ spec_public @*/ int numero;
     private /*@ spec_public @*/ double saldo;
-    private /*@ spec_public @*/ Cliente titular;
-    private /*@ spec_public @*/ List<Transacao> historicoTransacoes;
+    private /*@ spec_public non_null @*/ Cliente titular;
+    private /*@ spec_public non_null @*/ List<Transacao> historicoTransacoes;
 
     //@ public invariant numero >= 1000 && numero <= 9999;
     //@ public invariant titular != null;
@@ -15,12 +16,12 @@ public abstract class Conta {
 
     //@ requires num >= 1000 && num <= 9999;
     //@ requires tit != null;
+    //@ assignable \nothing;
     //@ ensures this.numero == num;
     //@ ensures this.saldo == s;
     //@ ensures this.titular == tit;
     //@ ensures this.historicoTransacoes != null;
-    //@ ensures this.historicoTransacoes.size() == 0;
-    //@ pure
+    //@ ensures this.historicoTransacoes.isEmpty();
     public Conta(int num, double s, Cliente tit) {
         this.numero = num;
         this.titular = tit;
@@ -56,7 +57,7 @@ public abstract class Conta {
 
     //@ ensures \result == this.titular;
     //@ ensures \result != null;
-    //@ pure
+    //@ spec_pure
     public Cliente getTitular() {
         return this.titular;
     }
@@ -71,7 +72,7 @@ public abstract class Conta {
     //@ ensures \result != null;
     //@ ensures \result.size() == historicoTransacoes.size();
     //@ ensures \fresh(\result);
-    //@ pure
+    //@ spec_pure
     public List<Transacao> getHistoricoTransacoes() {
         return new ArrayList<>(this.historicoTransacoes);
     }
@@ -87,7 +88,7 @@ public abstract class Conta {
 
     //@ public normal_behavior
     //@   requires valor > 0;
-    //@   assignable saldo, historicoTransacoes, titular.historicoTransacoes;
+    //@   assignable saldo, historicoTransacoes, titular.historicoTransacoes, Transacao.contadorId;
     //@   ensures saldo == \old(saldo) + valor;
     //@   ensures historicoTransacoes.size() == \old(historicoTransacoes.size()) + 1;
     //@ also
@@ -125,7 +126,7 @@ public abstract class Conta {
 
     //@ public normal_behavior
     //@   requires saldo >= calcularTarifa();
-    //@   assignable saldo, historicoTransacoes, titular.historicoTransacoes;
+    //@   assignable saldo, historicoTransacoes, titular.historicoTransacoes, Transacao.contadorId;
     //@   ensures saldo == \old(saldo) - calcularTarifa();
     //@   ensures historicoTransacoes.size() == \old(historicoTransacoes.size()) + 1;
     //@ also

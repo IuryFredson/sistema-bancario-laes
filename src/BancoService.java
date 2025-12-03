@@ -91,9 +91,12 @@ public class BancoService {
     //@   assignable \nothing;
     //@   signals_only ValidacaoException;
     public /*@ pure @*/ Cliente buscarClientePorCpf(String cpf) throws ValidacaoException {
-        for (Cliente c : clientes) {
-            if (c.getCpf().equals(cpf)) {
-                return c;
+        //@ maintaining 0 <= i && i <= clientes.size();
+        //@ maintaining (\forall int j; 0 <= j && j < i; !clientes.get(j).getCpf().equals(cpf));
+        //@ decreases clientes.size() - i;
+        for (int i = 0; i < clientes.size(); i++) {
+            if (clientes.get(i).getCpf().equals(cpf)) {
+                return clientes.get(i);
             }
         }
         throw new ValidacaoException("Cliente não encontrado.");
@@ -250,13 +253,13 @@ public class BancoService {
         if (novoEndereco != null && !novoEndereco.isEmpty())
             funcionario.setEndereco(novoEndereco);
 
-        if (novoTelefone != null && !novoTelefone.isEmpty())
+        if (novoTelefone != null && novoTelefone.length() >= 8 && novoTelefone.length() <= 13)
             funcionario.setTelefone(novoTelefone);
 
         if (novoCargo != null && !novoCargo.isEmpty())
             funcionario.setCargo(novoCargo);
 
-        if (novoSalario >= 0)
+        if (novoSalario > 0)
             funcionario.setSalario(novoSalario);
     }
 
@@ -345,10 +348,13 @@ public class BancoService {
     //@ public exceptional_behavior
     //@   requires !contaExiste(numero);
     //@   signals_only ValidacaoException;
-    public /*@ pure @*/ Conta buscarContaPorNumero(int numero) throws ValidacaoException {
-        for (Conta c : contas) {
-            if (c.getNumero() == numero) {
-                return c;
+    public /*@ spec_pure @*/ Conta buscarContaPorNumero(int numero) throws ValidacaoException {
+        //@ maintaining 0 <= i && i <= contas.size();
+        //@ maintaining (\forall int j; 0 <= j && j < i; contas.get(j).getNumero() != numero);
+        //@ decreases contas.size() - i;
+        for (int i = 0; i < contas.size(); i++) {
+            if (contas.get(i).getNumero() == numero) {
+                return contas.get(i);
             }
         }
         throw new ValidacaoException("Conta não encontrada.");
@@ -410,10 +416,14 @@ public class BancoService {
         numerosUsados.remove(conta.getNumero());
     }
 
+    //@ requires true;
     //@ ensures \result == (\exists int i; 0 <= i && i < contas.size(); contas.get(i).getNumero() == numero);
     private /*@ spec_public pure helper @*/ boolean contaExiste(int numero) {
-        for (Conta c : contas) {
-            if (c.getNumero() == numero) {
+        //@ maintaining 0 <= i && i <= contas.size();
+        //@ maintaining (\forall int j; 0 <= j && j < i; contas.get(j).getNumero() != numero);
+        //@ decreases contas.size() - i;
+        for (int i = 0; i < contas.size(); i++) {
+            if (contas.get(i).getNumero() == numero) {
                 return true;
             }
         }

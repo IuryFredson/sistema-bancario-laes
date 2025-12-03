@@ -20,10 +20,12 @@ public class Transacao {
     //@ requires tipo != null;
     //@ requires valor > 0;
     //@ requires descricao != null;
+    //@ assignable contadorId;
     //@ ensures this.tipo == tipo;
     //@ ensures this.valor == valor;
     //@ ensures this.descricao.equals(descricao);
     //@ ensures this.id > \old(contadorId);
+    //@ ensures contadorId == \old(contadorId) + 1;
     //@ ensures this.dataHora != null;
     //@ ensures this.contaOrigem == null;
     //@ ensures this.contaDestino == null;
@@ -39,6 +41,7 @@ public class Transacao {
     //@ requires tipo != null;
     //@ requires valor > 0;
     //@ requires descricao != null;
+    //@ assignable contadorId; // <--- ADICIONE ISSO
     //@ ensures this.tipo == tipo;
     //@ ensures this.valor == valor;
     //@ ensures this.descricao.equals(descricao);

@@ -56,7 +56,7 @@ public class Cliente extends Pessoa {
 
     //@ ensures \result == tipoCliente;
     //@ ensures \result != null && !\result.isEmpty();
-    //@ pure
+    //@ spec_pure
     public String getTipoCliente() {
         return tipoCliente;
     }
@@ -66,10 +66,6 @@ public class Cliente extends Pessoa {
     //@ ensures tipoCliente.equals(tipo);
     public void setTipoCliente(String tipo) {
         this.tipoCliente = tipo;
-    }
-
-    public /*@ pure @*/ String getNome() {
-        return super.getNome();
     }
 
     //@ ensures \result == renda;
@@ -128,7 +124,7 @@ public class Cliente extends Pessoa {
     //@ ensures \result != null;
     //@ ensures \result.size() == historicoTransacoes.size();
     //@ ensures \fresh(\result);
-    //@ pure
+    //@ spec_pure
     public List<Transacao> getHistoricoTransacoes() {
         return new ArrayList<>(this.historicoTransacoes);
     }
